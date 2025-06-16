@@ -38,6 +38,7 @@ This script performs a `transfer(to, amount)` transaction using the same Solana 
   - Confirms that **ERC-20 transfer logic** can be executed from a Solana key
 
 Neon EVM transaction hash: [0x086aa16977fe280fc841a2ad878bc2dd2603f5244b9c86fc7ebdce636bf92b72](https://neon-devnet.blockscout.com/tx/0x086aa16977fe280fc841a2ad878bc2dd2603f5244b9c86fc7ebdce636bf92b72)
+
 ---
 
 ## 🔄 Understanding "Scheduled Transactions"
