@@ -9,9 +9,9 @@ Both actions are initiated using a Solana keypair, showcasing how Neon maps Sola
 
 ---
 
-## 🛠 What the Scripts Do
+## What the Scripts Do
 
-### ✅ Script 1 – `approve()`
+### Script 1 – `approve()`
 
 This script uses a Solana wallet to submit an `approve(spender, amount)` transaction for a USDC token on Neon EVM.
 
@@ -24,7 +24,7 @@ This script uses a Solana wallet to submit an `approve(spender, amount)` transac
 
 Neon EVM transaction hash: [0x3e5c52a534f177627449d628ea1b53f435962d3f9f1919964497fbf52c59edb3](https://neon-devnet.blockscout.com/tx/0x3e5c52a534f177627449d628ea1b53f435962d3f9f1919964497fbf52c59edb3)
 
-### ✅ Script 2 – `transfer()`
+### Script 2 – `transfer()`
 
 This script performs a `transfer(to, amount)` transaction using the same Solana wallet.
 
@@ -41,7 +41,7 @@ Neon EVM transaction hash: [0x086aa16977fe280fc841a2ad878bc2dd2603f5244b9c86fc7e
 
 ---
 
-## 🔄 Understanding "Scheduled Transactions"
+## Understanding "Scheduled Transactions"
 
 Neon doesn't submit Ethereum transactions directly. Instead:
 
@@ -54,7 +54,7 @@ This design allows Solana-native users to interact with Ethereum-like contracts 
 
 ---
 
-## 🧠 Key Observations
+## Key Observations
 
 - Neon bridges the **Solana execution environment** and **EVM behavior**, allowing Solana users to:
   - Grant ERC-20 token approvals
