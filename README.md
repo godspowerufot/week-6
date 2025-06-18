@@ -1,13 +1,4 @@
-# Neon EVM: Token Approval and Transfer via Solana Wallet
-
-These scripts demonstrates how to interact with ERC-20 tokens on the **Neon EVM** using **Solana-native wallets**. It covers two fundamental operations:
-
-1. **Granting a USDC token approval**
-2. **Executing a USDC token transfer**
-
-Both actions are initiated using a Solana keypair, showcasing how Neon maps Solana-based transactions into Ethereum-style interactions.
-
----
+# Neon EVM: Gas Estimation, Balance Changes, and Transaction Flow
 
 ## What the Scripts Do
 
@@ -22,7 +13,7 @@ This script uses a Solana wallet to submit an `approve(spender, amount)` transac
   - Transaction successfully scheduled and finalized
   - Shows the **approve()** logic works with Solana keys via Neon
 
-Neon EVM transaction hash: [0x3e5c52a534f177627449d628ea1b53f435962d3f9f1919964497fbf52c59edb3](https://neon-devnet.blockscout.com/tx/0x3e5c52a534f177627449d628ea1b53f435962d3f9f1919964497fbf52c59edb3)
+Neon EVM transaction hash: [0x83d139cab7f7cd84a5800965630248830d52cc9c20adc381b1766ec25fd5de0e](https://neon-devnet.blockscout.com/tx/0x83d139cab7f7cd84a5800965630248830d52cc9c20adc381b1766ec25fd5de0e)
 
 ### Script 2 – `transfer()`
 
@@ -37,30 +28,55 @@ This script performs a `transfer(to, amount)` transaction using the same Solana 
   - Transaction finalized successfully
   - Confirms that **ERC-20 transfer logic** can be executed from a Solana key
 
-Neon EVM transaction hash: [0x086aa16977fe280fc841a2ad878bc2dd2603f5244b9c86fc7ebdce636bf92b72](https://neon-devnet.blockscout.com/tx/0x086aa16977fe280fc841a2ad878bc2dd2603f5244b9c86fc7ebdce636bf92b72)
+Neon EVM transaction hash: [0x3ffae1c28c421372790382d591d2f54b8c171c3a2d21618da3dd632b9461b923](https://neon-devnet.blockscout.com/tx/0x3ffae1c28c421372790382d591d2f54b8c171c3a2d21618da3dd632b9461b923)
 
 ---
 
-## Understanding "Scheduled Transactions"
+# OBSERVATION BASE ON THE NEON EVM APPROVAL AND TRANSFER
 
-Neon doesn't submit Ethereum transactions directly. Instead:
+## 1. Gas Estimation
 
-- Transactions are **scheduled** by preparing a payload (e.g., `approve()` or `transfer()`)
-- A Solana wallet signs and submits this payload using Neon’s `neon_estimateScheduledGas` and scheduling logic
-- A **Solana transaction** is sent, and upon finalization, Neon executes the Ethereum-equivalent action
-- Transaction hashes are available for both Solana and Neon EVM layers
-
-This design allows Solana-native users to interact with Ethereum-like contracts without converting wallets.
+- The code uses `proxyApi.estimateScheduledTransactionGas` to estimate gas for Neon EVM transactions.
+- If the sender's SPL token account (ATA) or approval is missing, the script adds the required Solana instructions before sending the transaction.
+- If approval is missing, gas estimation for the transfer fails with `"execution reverted"` because the contract is not yet approved to spend the tokens.
 
 ---
 
-## Key Observations
+## 2. Balance Changes
 
-- Neon bridges the **Solana execution environment** and **EVM behavior**, allowing Solana users to:
-  - Grant ERC-20 token approvals
-  - Transfer tokens
-  - Pay gas via wrapped SOL or treasury accounts
-- The `scheduledSolanaPayer` parameter links Solana-native gas payment to Neon EVM transactions
-- Transaction finality happens only after both:
-  1. The Solana transaction confirms
-  2. The Neon EVM processes and publishes the EVM-compatible transaction
+- **Before Transfer:**
+  - Sender’s USDC balance: `5,000,000n`
+  - Receiver’s USDC balance: `0n`
+- **After Transfer:**
+  - Sender’s USDC balance: `4,000,000n`
+  - Receiver’s USDC balance: `1,000,000n`
+- This confirms that `1 USDC` (with 6 decimals) was transferred from sender to receiver.
+  THE Gas estimation is realtively low and fast
+
+---
+
+## 3. Transaction Hash Resolution from Neon RPC
+
+- After submitting the scheduled transaction to Solana, the code waits and then queries Neon RPC for the EVM transaction hash using `neon_getTransactionBySenderNonce`.
+- The Neon EVM transaction hash is printed, confirming the transaction was processed on the Neon EVM side.
+
+---
+
+## 4. Scheduled Transaction Signature
+
+- Each transaction submitted to Solana returns a Solana transaction signature (e.g., `66jjaitodEWkmAftDpktbHCZGSMMSwGFi9WYhLd89v3A2Jh52psi9q9cGjWDuaqCA7NPk2hNhm1MKzwa73ZFZMg7`).
+- This signature can be used to track the transaction on the Solana blockchain.
+
+---
+
+## 5. Approval Flow
+
+- If the sender’s ATA does not have the correct delegate or approval, the code adds an approval instruction to the transaction.
+- This is necessary for the Neon EVM contract to transfer tokens on behalf of the user.
+
+---
+
+## 6. Error Handling
+
+- If the sender’s ATA does not exist, the code creates it.
+- If the sender’s USDC balance is zero, the script exits and prompts the user to add USDC.
